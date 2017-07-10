@@ -23,7 +23,7 @@ class CMDTwiddler():
         server = self.rpc_helper.get_server_proxy()
 
         try:
-            info = server.supervisor.getProcessInfo(self.rpc_helper.get_program_name(group_name, program_name))
+            info = server.supervisor.getProcessInfo(self.get_program_name(group_name, program_name))
             if info['statename'] != "RUNNING":  # no need to stop program
                 return True
 
