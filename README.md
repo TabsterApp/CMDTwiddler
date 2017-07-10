@@ -16,6 +16,10 @@ to register the twiddler interface:
 
 You must restart Supervisor for the twiddler interface to be loaded.
 
+**Configuration**
+In case supervisor rpc requires username and password copy example cmdtwiddler.ini to ```/etc/cmdtwiddler/```
+Add correct username and password to the file. 
+
 Running
 --------
 Usage: ```cmdtwiddler twiddle [options] action group_name program_name```
@@ -32,3 +36,10 @@ Required arguments:
 - action: Specify what action to execute, either "add" or "remove"
 - group_name: Name of the group to which program should be added
 - program_name: Name of the program being added
+
+
+Building
+---------
+Nothing out of the ordinary
+- ```python setup.py bdist_wheel --universal```
+- ```twine upload dist/*```

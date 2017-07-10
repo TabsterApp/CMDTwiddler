@@ -6,6 +6,7 @@ from hypothesis import given
 from hypothesis.strategies import text
 
 from cmdtwiddler.cmdtwiddler import *
+from cmdtwiddler.RPCHelper import *
 
 from supervisor_twiddler.tests.test_rpcinterface import *
 from supervisor.xmlrpc import Faults as SupervisorFaults
@@ -28,16 +29,17 @@ class TestCmdTwiddler(unittest.TestCase):
             twiddle_command(action, "test_group", "test_program")
 
     def test_handle_rpc_fault_handles_all_faults(self):
+        rpc_helper = RPCHelper()
         supervisor_fault_codes = self.attrDictWithoutUnders(SupervisorFaults).values()
         for item in supervisor_fault_codes:
             fault = Fault(item, getFaultDescription(item))
 
             if item == 2 or item == 10:
                 with self.assertRaises(SystemExit):
-                    handle_rpc_fault(fault)
+                    rpc_helper.handle_rpc_fault(fault)
             else:
                 with self.assertRaises(Fault):
-                    handle_rpc_fault(fault)
+                    rpc_helper.handle_rpc_fault(fault)
 
 
 if __name__ == '__main__':
