@@ -46,15 +46,11 @@ class RPCHelper():
         """
         user, password = self.load_config()
 
-        try:
-            if len(user) == 0 and len(password) == 0:
-                s = xmlrpclib.ServerProxy('http://localhost:9001', allow_none=True)
-            else:
-                s = xmlrpclib.ServerProxy('http://' + user + ':' + password + '@localhost:9001', allow_none=True)
-        except xmlrpclib.ProtocolError as e:
-            print e.message
-            print "Make sure /etc/cmdtwiddler/cmdtwiddler.ini exists, is readable and contains supervisor username and password"
-            exit(1)
+        if len(user) == 0 and len(password) == 0:
+            s = xmlrpclib.ServerProxy('http://localhost:9001', allow_none=True)
+        else:
+            s = xmlrpclib.ServerProxy('http://' + user + ':' + password + '@localhost:9001', allow_none=True)
+
 
         return s
 

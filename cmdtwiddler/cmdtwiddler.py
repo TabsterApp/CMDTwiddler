@@ -2,6 +2,7 @@
 import sys
 import xmlrpclib
 from scriptine import run
+
 from RPCHelper import RPCHelper
 
 
@@ -30,6 +31,10 @@ class CMDTwiddler():
 
         except xmlrpclib.Fault as e:
             raise self.rpc_helper.handle_rpc_fault(e)
+        except xmlrpclib.ProtocolError as e:
+            print e.message
+            print "Make sure /etc/cmdtwiddler/cmdtwiddler.ini exists, is readable and contains supervisor username and password"
+            exit(1)
 
         return result
 
@@ -64,6 +69,10 @@ class CMDTwiddler():
         except xmlrpclib.Fault as e:
             print "Unable to add program {0} to group {1}".format(program_name, group_name)
             raise self.rpc_helper.handle_rpc_fault(e)
+        except xmlrpclib.ProtocolError as e:
+            print e.message
+            print "Make sure /etc/cmdtwiddler/cmdtwiddler.ini exists, is readable and contains supervisor username and password"
+            exit(1)
 
         try:
             result = server.supervisor.startProcess(group_name + ":" + program_name)
