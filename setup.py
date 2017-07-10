@@ -11,7 +11,7 @@ setup(
     author='Bouke Nederstigt',
     author_email='bouke@tapp.cafe',
     url='https://github.com/TabsterApp/CMDTwiddler',
-    download_url='https://github.com/peterldowns/mypackage/archive/0.1.tar.gz',
+    download_url='https://github.com/TabsterApp/CMDTwiddler',
     keywords=['supervisor', 'twiddler', 'command line'],
     classifiers=[],
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),

@@ -85,10 +85,10 @@ def stop_program_when_running(group_name, program_name):
 
     try:
         info = server.supervisor.getProcessInfo(get_program_name(group_name, program_name))
-        if info['statename'] == "RUNNING":  # no need to stop program
-            result = server.supervisor.stopProcess(group_name + ":" + program_name)
-        else:
+        if info['statename'] != "RUNNING":  # no need to stop program
             return True
+
+        result = server.supervisor.stopProcess(group_name + ":" + program_name)
 
     except xmlrpclib.Fault as e:
         raise handle_rpc_fault(e)
