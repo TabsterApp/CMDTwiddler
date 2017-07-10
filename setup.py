@@ -6,7 +6,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 setup(
     name='cmdtwiddler',
-    version='1.0.1',
+    version='1.0.2',
     description='Small wrapper for twiddler to add and remove supervisor processes on the fly from the command line',
     author='Bouke Nederstigt',
     author_email='bouke@tapp.cafe',
