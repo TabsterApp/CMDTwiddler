@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 import xmlrpclib
 from scriptine import run
@@ -54,7 +55,22 @@ class CMDTwiddler():
 
         return result
 
-    def add(self, group_name, program_name, cmd):
+    def load_env(self, env_file):
+        if not os.path.isfile(env_file):
+            raise AttributeError("Unable to load environment file")
+
+        env = ""
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#') or '=' not in line:
+                    continue
+
+                env += line + ", "
+
+        return env[0:-2]  # Strip trailing comma and space
+
+    def add(self, group_name, program_name, cmd, env_file=None):
         """
         Add program to supervisor group and try to start it. Deemed successful if program actually starts
         :param group_name: str - Group to which program should be attached
@@ -65,7 +81,12 @@ class CMDTwiddler():
         server = self.rpc_helper.get_server_proxy()
 
         try:
-            server.twiddler.addProgramToGroup(group_name, program_name, {'command': cmd, 'autostart': "false"})
+            if env_file:
+                server.twiddler.addProgramToGroup(group_name, program_name, {'command': cmd, 'autostart': "false",
+                                                                             "environment": self.load_env(env_file)})
+            else:
+                server.twiddler.addProgramToGroup(group_name, program_name, {'command': cmd, 'autostart': "false"})
+
         except xmlrpclib.Fault as e:
             print "Unable to add program {0} to group {1}".format(program_name, group_name)
             raise self.rpc_helper.handle_rpc_fault(e)
@@ -83,20 +104,21 @@ class CMDTwiddler():
         return result
 
 
-def twiddle_command(action, group_name, program_name, cmd=None):
+def twiddle_command(action, group_name, program_name, cmd=None, env_file=None):
     """
     Add or remove a process to supervisor without restarting supervisor or any other processes
     :param action: Specify what action to execute, either "add" or "remove"
     :param group_name: Name of the group to which program should be added
     :param program_name: Name of the program being added
     :param cmd: Actual command that executes program (only when adding new program)
+    :param env_file: File containing environment variables that will be added to supervisor when running cmd
     """
     rpc_helper = RPCHelper()
     server = rpc_helper.get_server_proxy()
 
     cmd_twiddler = CMDTwiddler()
     if action == 'add':
-        result = cmd_twiddler.add(group_name, program_name, cmd)
+        result = cmd_twiddler.add(group_name, program_name, cmd, env_file)
     elif action == "remove":
         result = cmd_twiddler.remove(group_name, program_name)
     else:
