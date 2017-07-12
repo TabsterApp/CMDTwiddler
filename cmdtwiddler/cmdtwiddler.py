@@ -40,6 +40,23 @@ class CMDTwiddler():
 
         return result
 
+    def start_when_not_running(self, group_name, program_name):
+        server = self.rpc_helper.get_server_proxy()
+
+        try:
+            info = server.supervisor.getProcessInfo(self.get_program_name(group_name, program_name))
+            if info['statename'] != "RUNNING" and info['statename'] != "STARTING":  # no need to start program
+                return server.supervisor.startProcess(group_name + ":" + program_name)
+            else:
+                return True
+
+        except xmlrpclib.Fault as e:
+            raise self.rpc_helper.handle_rpc_fault(e)
+        except xmlrpclib.ProtocolError as e:
+            print e.message
+            print "Make sure /etc/cmdtwiddler/cmdtwiddler.ini exists, is readable and contains supervisor username and password"
+            exit(1)
+
     def remove(self, group_name, program_name):
         """
         Remove program from supervisor. Stop first if needed
@@ -71,9 +88,9 @@ class CMDTwiddler():
                 parser = SupervisorConfigParser()
                 config = parser.load_config(config_file)
                 config['command'] = cmd
-                server.twiddler.addProgramToGroup(group_name, program_name, config)
+                return server.twiddler.addProgramToGroup(group_name, program_name, config)
             else:
-                server.twiddler.addProgramToGroup(group_name, program_name, {'command': cmd})
+                return server.twiddler.addProgramToGroup(group_name, program_name, {'command': cmd})
 
         except xmlrpclib.Fault as e:
             print "Unable to add program {0} to group {1}".format(program_name, group_name)
@@ -82,14 +99,6 @@ class CMDTwiddler():
             print e.message
             print "Make sure /etc/cmdtwiddler/cmdtwiddler.ini exists, is readable and contains supervisor username and password"
             exit(1)
-
-        try:
-            result = server.supervisor.startProcess(group_name + ":" + program_name)
-        except xmlrpclib.Fault as e:
-            print "Unable to start program {0}".format(program_name)
-            raise self.rpc_helper.handle_rpc_fault(e)
-
-        return result
 
 
 def twiddle_command(action, group_name, program_name, cmd=None, config_file=None):
@@ -107,7 +116,8 @@ def twiddle_command(action, group_name, program_name, cmd=None, config_file=None
 
     cmd_twiddler = CMDTwiddler()
     if action == 'add':
-        result = cmd_twiddler.add(group_name, program_name, cmd, config_file)
+        cmd_twiddler.add(group_name, program_name, cmd, config_file)
+        result = cmd_twiddler.start_when_not_running(group_name, program_name)
     elif action == "remove":
         result = cmd_twiddler.remove(group_name, program_name)
     else:
